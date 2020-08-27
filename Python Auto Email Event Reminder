@@ -1,0 +1,45 @@
+
+from email.mime.text import MIMEText
+from email.header import Header
+from smtplib import SMTP_SSL
+
+
+#sender's qq account
+sender_qq = '570020793'
+#pwd is the 16-digits code for qq mail's POP3/IMAP/SMTP/Exchange/CardDAV/CalDAV
+pwd = 'gbxsybfxhjqcbcde'
+#the list of receivers of the emails
+receiver=['freda020502@gmail.com','292792548@qq.com']
+#content of the email
+mail_content = "Hi! This is a confirmation that you've registered for this evening's event. \
+You will receive the zoom link later today. Thank you for your participation!"
+#subject of the email
+mail_title = "Remainder for Today's Online Meeting"
+
+def send_mail(sender_qq='',pwd='',\
+    receiver='',mail_title='',mail_content=''):
+    # qq邮箱smtp服务器
+    host_server = 'smtp.qq.com'
+    sender_qq_mail = sender_qq+'@qq.com'
+
+    #ssl登录
+    smtp = SMTP_SSL(host_server)
+    #set_debuglevel()是用来调试的。参数值为1表示开启调试模式，参数值为0关闭调试模式
+    smtp.set_debuglevel(1)
+    smtp.ehlo(host_server)
+    smtp.login(sender_qq, pwd)
+
+    msg = MIMEText(mail_content, "plain", 'utf-8')
+    msg["Subject"] = Header(mail_title, 'utf-8')
+    msg["From"] = sender_qq_mail
+    for i in range(len(receiver)):
+        msg["To"] = receiver[i]
+    smtp.sendmail(sender_qq_mail, receiver, msg.as_string())
+    smtp.quit()
+
+
+for i in range(2):
+     send_mail(sender_qq=sender_qq,pwd=pwd,\
+     receiver=receiver,mail_title=mail_title,\
+     mail_content=mail_content)
+
