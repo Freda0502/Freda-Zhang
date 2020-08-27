@@ -1,0 +1,59 @@
+'''
+This program compares the price of identical item on two shoppoing website, 
+and then send an email to users indicating which one is cheaper
+'''
+
+#jingdong
+import requests,bs4,webbrowser,json
+res = requests.get('http://p.3.cn/prices/mgets?skuIds=12477870')
+so=bs4.BeautifulSoup(res.text,features="html.parser")
+
+jd=json.loads(res.text)
+for item in jd:
+    jd_price=float(item['p'])
+
+#dangdang
+headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
+'cookie': 'acw_tc=6f3e47cc15498749418558688e3d6410ea97be9a552b180841c5079605; PHPSESSID=s2hjdg3slh32omchfsib4himk0; UM_distinctid=168dbbfe8c533e-0e42df11c1c0a7-9393265-100200-168dbbfe8c71088; CNZZDATA1256319371=345851669-1549873534-%7C1549873534; CNZZDATA1257119496=134880590-1549870452-%7C1549870452; Hm_lvt_a48e6ab107a4e68d47e6fdb5d83961e5=1549875015; Hm_lvt_3c8ecbfa472e76b0340d7a701a04197e=1549875021; CNZZDATA1254708131=653924416-1549874976-%7C1549874976; CNZZDATA1275922735=1673340420-1549874690-%7C1549874690; CNZZDATA1257131565=1820590917-1549873827-%7C1549873827; CNZZDATA1257125147=1301871275-1549871347-https%253A%252F%252Fwww.duanwenxue.com%252F%7C1549871347; Hm_lpvt_a48e6ab107a4e68d47e6fdb5d83961e5=1549875906; Hm_lpvt_3c8ecbfa472e76b0340d7a701a04197e=1549875913; ajax_award_timestamp=1549875887; ajax_award_timestamp__ckMd5=706904497e9c8dfd; ajax_award_key=94a17405d22ab8aacbabbbfdb9d4740c; ajax_award_key__ckMd5=3e97bde02ab1998d',
+'referer': 'https://www.duanwenxue.com/huayu/tianyanmiyu/list_69.html',
+'upgrade-insecure-requests' : '1',
+}
+res = requests.get('http://product.dangdang.com/25579993.html',headers=headers)
+so=bs4.BeautifulSoup(res.text,features="html.parser")
+pp=so.select("#dd-price")
+dd_price=float(pp[0].getText()[2:].strip())
+
+print(jd_price)
+print(dd_price)
+message="jd_price:"+str(jd_price)+",dangdang_price:"+str(dd_price)
+
+
+import smtplib
+from email.mime.text import MIMEText
+from email.utils import formataddr
+
+my_sender='317977682@qq.com'    # 发件人邮箱账号
+my_pass = 'orvwjmtgguwvbjfe'              # 发件人邮箱密码(当时申请smtp给的口令)
+my_user='317977682@qq.com'      # 收件人邮箱账号，我这边发送给自己
+def mail():
+    ret=True
+    msg=MIMEText(message,'plain','utf-8')
+    msg['From']=formataddr(["发件人昵称",my_sender])  # 括号里的对应发件人邮箱昵称、发件人邮箱账号
+    msg['To']=formataddr(["收件人昵称",my_user])              # 括号里的对应收件人邮箱昵称、收件人邮箱账号
+    msg['Subject']="邮件主题-测试"                # 邮件的主题，也可以说是标题
+    server=smtplib.SMTP_SSL("smtp.qq.com", 465)  # 发件人邮箱中的SMTP服务器，端口是465
+    server.login(my_sender, my_pass)  # 括号中对应的是发件人邮箱账号、邮箱密码
+    server.sendmail(my_sender,[my_user,],msg.as_string())  # 括号中对应的是发件人邮箱账号、收件人邮箱账号、发送邮件
+    server.quit()# 关闭连接
+    return ret
+
+ret=mail()
+if ret:
+    print("邮件发送成功")
+else:
+    print("邮件发送失败")
+
+if jd_price<dd_price:
+    print('jd')
+else:
+    print('dangdang')
