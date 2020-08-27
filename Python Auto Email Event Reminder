@@ -1,3 +1,6 @@
+'''
+This program automatically sends email remainders to all the users that signed up for an event.
+'''
 
 from email.mime.text import MIMEText
 from email.header import Header
